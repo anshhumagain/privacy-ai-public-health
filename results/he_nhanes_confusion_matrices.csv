@@ -1,0 +1,5 @@
+Model,Actual Class,Predicted 0,Predicted 1
+Normal Logistic Regression,0,501,3
+Normal Logistic Regression,1,39,15
+HE Logistic Regression Inference,0,501,3
+HE Logistic Regression Inference,1,39,15

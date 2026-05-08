@@ -1,10 +1,12 @@
 privacy_env/
 similarity_env/
-datasets/covid.csv
+
 __pycache__/
 .ipynb_checkpoints/
-.DS_Store
 *.pyc
+
+.DS_Store
+
 .env
-datasets/covid.csv
+
 datasets/covid.csv

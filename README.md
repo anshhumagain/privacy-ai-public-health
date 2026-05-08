@@ -1,6 +1,6 @@
 # Privacy-Preserving AI for Public Health Surveillance
 
-This project investigates privacy-preserving machine learning technoques for public health surveillance systems. The goal is to evaluate how different privacy methods affect model performance, privacy protection, and ethical considerations when using sensitive healthcare data.
+This project investigates privacy-preserving machine learning techniques for public health surveillance systems. The goal is to evaluate how different privacy methods affect model performance, privacy protection, and ethical considerations when using sensitive healthcare data.
 
 The project compares multiple approaches, which includes:
 - Differential Privacy
@@ -29,9 +29,11 @@ This project was tested using the following:
 - Python 3.11
 - scikit-learn 1.6.1
 - diffprivlib 0.66
+- TenSEAL 0.3.16
+- Micorosft SEAL backend (installed automatically through TenSEAL)
 Python 3.14 may cause compatibility issues with diffprivlib and newer scikit-learn versions.
 
-# Setup
+# Differential Privacy Setup
 
 Create and activate a virtual enviornment:
 
@@ -41,6 +43,24 @@ source privacy_env/bin/activate
 Install dependencies:
 
 pip install -r requirements.txt
+
+# Homomorphic Encryption Setup
+
+The Homomorphic Encryption experiments use TenSEAL, which wraps the Microsoft SEAL encrpytion library. 
+
+Install additional dependencies if required:
+
+pip install tenseal
+pip install cmake
+
+If installation fails on macOS:
+
+brew install cmake
+brew install protobuf
+
+Then retry: 
+
+pip install tenseal
 
 # COVID-19 Dataset
 
@@ -76,13 +96,21 @@ python src/nhanes_dp_experiment.py
 
 python src/covid_dp_experiment.py
 
-## Generate Visualisations
+## Run Homorphic Encryption Experiment
 
-python src/visualise_results.py
+python src/he_nhanes_experiment.py
+
+## Generate Differential Privacy Visualisations
+
+python src/visualise_dp_results.py
 
 Generated graphs will be saved inside:
 
 graphs/
+
+## Generate Homomorphic Encryption Visualisations
+
+python src/ visualise_he_results.py
 
 # Outputs
 

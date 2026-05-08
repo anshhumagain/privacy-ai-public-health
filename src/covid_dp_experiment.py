@@ -1,176 +1,251 @@
-import pandas as pd
-import numpy as np
-import time
-from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LogisticRegression
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score, confusion_matrix
-from sklearn.preprocessing import MinMaxScaler, LabelEncoder
-import diffprivlib as dp
-import warnings
 from pathlib import Path
-warnings.filterwarnings('ignore')
+import time
+import warnings
+
+import diffprivlib.models as dp_models
+import numpy as np
+import pandas as pd
+
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import LabelEncoder, MinMaxScaler
+
+warnings.filterwarnings("ignore")
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-DATA_DIR = BASE_DIR / "datasets"
+DATASETS_DIR = BASE_DIR / "datasets"
 RESULTS_DIR = BASE_DIR / "results"
+
 RESULTS_DIR.mkdir(exist_ok=True)
 
-SEEDS = [1, 21, 42, 100, 123]
+RANDOM_SEEDS = [42, 43, 44, 45, 46]
 EPSILONS = [10.0, 5.0, 1.0, 0.5, 0.1]
+SAMPLE_SIZE = 50000
 
-print("Loading COVID dataset...")
-df = pd.read_csv(DATA_DIR / 'covid.csv', low_memory=False)
-print(f"Full dataset shape: {df.shape}")
+DATASET_PATH = DATASETS_DIR / "covid.csv"
 
-features = ['sex', 'age_group', 'medcond_yn']
-target = 'death_yn'
+RAW_RESULTS_PATH = RESULTS_DIR / "dp_covid_results_raw.csv"
+SUMMARY_RESULTS_PATH = RESULTS_DIR / "dp_covid_results_summary.csv"
+MAIN_RESULTS_PATH = RESULTS_DIR / "dp_covid_results.csv"
 
-df = df[features + [target]].copy()
+df = pd.read_csv(DATASET_PATH, low_memory=False)
 
-for col in df.columns:
-    df = df[~df[col].isin(['Missing', 'Unknown', 'NA', 'NaN'])]
+if "death_yn" in df.columns:
+    target = "death_yn"
+elif "hosp_yn" in df.columns:
+    target = "hosp_yn"
+else:
+    raise ValueError("Could not find a valid COVID target column. Expected 'death_yn' or 'hosp_yn'.")
 
-df = df.dropna()
-df = df[df[target].isin(['Yes', 'No'])]
-df[target] = df[target].map({'Yes': 1, 'No': 0})
+df = df.copy()
 
-df = df.sample(n=50000, random_state=42)
+df = df[df[target].isin(["Yes", "No"])].copy()
+df[target] = df[target].map({"Yes": 1, "No": 0})
 
-le = LabelEncoder()
-for col in features:
-    df[col] = le.fit_transform(df[col].astype(str))
+if len(df) > SAMPLE_SIZE:
+    df = df.sample(n=SAMPLE_SIZE, random_state=42)
 
-print("\n" + "=" * 60)
-print("COVID — CLASS DISTRIBUTION (after sampling)")
-print("=" * 60)
-class_counts = df[target].value_counts()
-class_pct = df[target].value_counts(normalize=True) * 100
-class_table = pd.DataFrame({'Count': class_counts, 'Percentage': class_pct.round(2)})
-class_table.index = ['Survived (0)', 'Died (1)']
-print(class_table.to_string())
-print(f"\nTotal records: {len(df)}")
-print(f"Features: {features}\n")
+drop_columns = [
+    target,
+    "cdc_case_earliest_dt",
+    "cdc_report_dt",
+    "pos_spec_dt",
+    "onset_dt",
+]
 
-X = df[features]
+drop_columns = [column for column in drop_columns if column in df.columns]
+
+X = df.drop(columns=drop_columns)
 y = df[target]
+
+missing_ratio = X.isna().mean()
+X = X.loc[:, missing_ratio < 0.5]
+
+for column in X.columns:
+    if pd.api.types.is_numeric_dtype(X[column]):
+        X[column] = X[column].fillna(X[column].median())
+    else:
+        X[column] = X[column].fillna("Unknown")
+
+for column in X.columns:
+    if not pd.api.types.is_numeric_dtype(X[column]):
+        encoder = LabelEncoder()
+        X[column] = encoder.fit_transform(X[column].astype(str))
+
+X = X.replace([np.inf, -np.inf], np.nan)
+X = X.fillna(0)
 
 scaler = MinMaxScaler()
 X_scaled = pd.DataFrame(scaler.fit_transform(X), columns=X.columns)
 
+print("COVID cleaned dataset shape:", X_scaled.shape)
+print("COVID target used:", target)
+print("COVID target distribution:")
+print(y.value_counts())
 
-def evaluate(model, X_train, X_test, y_train, y_test, name, epsilon_label=None):
-    start_train = time.time()
+def evaluate_model(model, X_train, X_test, y_train, y_test, model_name, privacy_setting, seed):
+    start_time = time.time()
+
     model.fit(X_train, y_train)
-    train_time = round(time.time() - start_train, 4)
+    predictions = model.predict(X_test)
 
-    start_pred = time.time()
-    y_pred = model.predict(X_test)
-    pred_time = round(time.time() - start_pred, 4)
+    train_time = time.time() - start_time
 
     return {
-        'Model': name,
-        'Privacy Setting': epsilon_label if epsilon_label else 'Baseline (No Privacy)',
-        'Accuracy': round(accuracy_score(y_test, y_pred), 4),
-        'F1 Score': round(f1_score(y_test, y_pred, zero_division=0), 4),
-        'Precision': round(precision_score(y_test, y_pred, zero_division=0), 4),
-        'Recall': round(recall_score(y_test, y_pred, zero_division=0), 4),
-        'Train Time (s)': train_time,
-        'Predict Time (s)': pred_time,
-        'Confusion Matrix': confusion_matrix(y_test, y_pred).tolist(),
+        "Dataset": "COVID-19",
+        "Seed": seed,
+        "Model": model_name,
+        "Privacy Setting": privacy_setting,
+        "Accuracy": accuracy_score(y_test, predictions),
+        "F1 Score": f1_score(y_test, predictions, zero_division=0),
+        "Precision": precision_score(y_test, predictions, zero_division=0),
+        "Recall": recall_score(y_test, predictions, zero_division=0),
+        "Train Time (s)": train_time,
     }
-
 
 all_results = []
 
-for seed in SEEDS:
-    print(f"\n{'=' * 60}  SEED {seed}  {'=' * 60}")
+for seed in RANDOM_SEEDS:
+    print(f"\nRunning COVID-19 experiments with random seed {seed}")
 
     X_train, X_test, y_train, y_test = train_test_split(
-        X_scaled, y, test_size=0.2, random_state=seed, stratify=y
+        X_scaled,
+        y,
+        test_size=0.2,
+        random_state=seed,
+        stratify=y,
     )
 
-    all_results.append({'Seed': seed, **evaluate(
-        LogisticRegression(max_iter=1000),
-        X_train, X_test, y_train, y_test,
-        name='Logistic Regression'
-    )})
+    baseline_lr = LogisticRegression(max_iter=1000, random_state=seed)
+    all_results.append(
+        evaluate_model(
+            baseline_lr,
+            X_train,
+            X_test,
+            y_train,
+            y_test,
+            "Logistic Regression",
+            "Baseline (No Privacy)",
+            seed,
+        )
+    )
 
-    all_results.append({'Seed': seed, **evaluate(
-        RandomForestClassifier(n_estimators=100, random_state=seed),
-        X_train, X_test, y_train, y_test,
-        name='Random Forest'
-    )})
+    baseline_rf = RandomForestClassifier(n_estimators=100, random_state=seed)
+    all_results.append(
+        evaluate_model(
+            baseline_rf,
+            X_train,
+            X_test,
+            y_train,
+            y_test,
+            "Random Forest",
+            "Baseline (No Privacy)",
+            seed,
+        )
+    )
 
-    all_results.append({'Seed': seed, **evaluate(
-        LogisticRegression(max_iter=1000, class_weight='balanced'),
-        X_train, X_test, y_train, y_test,
-        name='Logistic Regression Balanced'
-    )})
+    for epsilon in EPSILONS:
+        dp_lr = dp_models.LogisticRegression(
+            epsilon=epsilon,
+            data_norm=1.0,
+            max_iter=1000,
+            random_state=seed,
+        )
 
-    all_results.append({'Seed': seed, **evaluate(
-        RandomForestClassifier(n_estimators=100, random_state=seed, class_weight='balanced'),
-        X_train, X_test, y_train, y_test,
-        name='Random Forest Balanced'
-    )})
+        all_results.append(
+            evaluate_model(
+                dp_lr,
+                X_train,
+                X_test,
+                y_train,
+                y_test,
+                "DP Logistic Regression",
+                f"DP e={epsilon}",
+                seed,
+            )
+        )
 
-    for eps in EPSILONS:
-        label = f'DP e={eps}'
+    for epsilon in EPSILONS:
+        dp_rf = dp_models.RandomForestClassifier(
+            epsilon=epsilon,
+            n_estimators=100,
+            random_state=seed,
+        )
 
-        all_results.append({'Seed': seed, **evaluate(
-            dp.models.LogisticRegression(epsilon=eps, max_iter=1000),
-            X_train, X_test, y_train, y_test,
-            name='DP Logistic Regression',
-            epsilon_label=label
-        )})
+        all_results.append(
+            evaluate_model(
+                dp_rf,
+                X_train,
+                X_test,
+                y_train,
+                y_test,
+                "DP Random Forest",
+                f"DP e={epsilon}",
+                seed,
+            )
+        )
 
-        all_results.append({'Seed': seed, **evaluate(
-            dp.models.RandomForestClassifier(epsilon=eps, n_estimators=10),
-            X_train, X_test, y_train, y_test,
-            name='DP Random Forest',
-            epsilon_label=label
-        )})
-        
-results_df = pd.DataFrame(all_results)
-agg_df = results_df.drop(columns=['Confusion Matrix', 'Seed'])
+raw_results = pd.DataFrame(all_results)
+raw_results.to_csv(RAW_RESULTS_PATH, index=False)
 
-metrics = ['Accuracy', 'F1 Score', 'Precision', 'Recall', 'Train Time (s)', 'Predict Time (s)']
-
-summary = agg_df.groupby(['Model', 'Privacy Setting'])[metrics].agg(['mean', 'std']).round(4)
-summary.columns = [f'{m} {s}' for m, s in summary.columns]
-summary = summary.reset_index()
-
-print("\n\n" + "=" * 80)
-print("COVID-19 — RESULTS (mean ± std across 5 seeds)")
-print("=" * 80)
-
-display_rows = []
-for _, row in summary.iterrows():
-    display_rows.append({
-        'Model': row['Model'],
-        'Privacy Setting': row['Privacy Setting'],
-        'Accuracy': f"{row['Accuracy mean']:.4f} ± {row['Accuracy std']:.4f}",
-        'F1 Score': f"{row['F1 Score mean']:.4f} ± {row['F1 Score std']:.4f}",
-        'Precision': f"{row['Precision mean']:.4f} ± {row['Precision std']:.4f}",
-        'Recall': f"{row['Recall mean']:.4f} ± {row['Recall std']:.4f}",
-        'Train Time (s)': f"{row['Train Time (s) mean']:.4f} ± {row['Train Time (s) std']:.4f}",
+summary_results = (
+    raw_results
+    .groupby(["Dataset", "Model", "Privacy Setting"])
+    .agg({
+        "Accuracy": ["mean", "std"],
+        "F1 Score": ["mean", "std"],
+        "Precision": ["mean", "std"],
+        "Recall": ["mean", "std"],
+        "Train Time (s)": ["mean", "std"],
     })
+    .reset_index()
+)
 
-display_df = pd.DataFrame(display_rows)
-print(display_df.to_string(index=False))
+summary_results.columns = [
+    "Dataset",
+    "Model",
+    "Privacy Setting",
+    "Accuracy mean",
+    "Accuracy std",
+    "F1 Score mean",
+    "F1 Score std",
+    "Precision mean",
+    "Precision std",
+    "Recall mean",
+    "Recall std",
+    "Train Time (s) mean",
+    "Train Time (s) std",
+]
 
-print("\n\n" + "=" * 80)
-print("CONFUSION MATRICES (seed=42)")
-print("=" * 80)
+summary_results.to_csv(SUMMARY_RESULTS_PATH, index=False)
 
-for _, row in results_df[results_df['Seed'] == 42].iterrows():
-    cm = np.array(row['Confusion Matrix'])
-    print(f"\n{row['Model']} | {row['Privacy Setting']}")
-    print(f"  TN: {cm[0,0]}  FP: {cm[0,1]}")
-    print(f"  FN: {cm[1,0]}  TP: {cm[1,1]}")
+main_results = summary_results.copy()
+main_results["Accuracy"] = main_results["Accuracy mean"]
+main_results["F1 Score"] = main_results["F1 Score mean"]
+main_results["Precision"] = main_results["Precision mean"]
+main_results["Recall"] = main_results["Recall mean"]
+main_results["Train Time (s)"] = main_results["Train Time (s) mean"]
 
-results_df.drop(columns=['Confusion Matrix']).to_csv(RESULTS_DIR / 'covid_results_raw.csv', index=False)
-summary.to_csv(RESULTS_DIR / 'covid_results_summary.csv', index=False)
-display_df.to_csv(RESULTS_DIR / 'covid_results.csv', index=False)
+main_results = main_results[
+    [
+        "Dataset",
+        "Model",
+        "Privacy Setting",
+        "Accuracy",
+        "F1 Score",
+        "Precision",
+        "Recall",
+        "Train Time (s)",
+    ]
+]
 
-print("\nSaved results/covid_results.csv, results/covid_results_summary.csv, results/covid_results_raw.csv")
+main_results.to_csv(MAIN_RESULTS_PATH, index=False)
+
+print("\nSaved COVID-19 DP files:")
+print(f"- {RAW_RESULTS_PATH}")
+print(f"- {SUMMARY_RESULTS_PATH}")
+print(f"- {MAIN_RESULTS_PATH}")
+print("\nCOVID-19 DP summary:")
+print(main_results)
