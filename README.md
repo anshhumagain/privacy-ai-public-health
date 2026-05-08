@@ -1,149 +1,103 @@
-# Privacy and Ethical Frameworks for AI Use in Public Health Surveillance
+# Privacy-Preserving AI for Public Health Surveillance
 
-This project investigates privacy-preserving machine learning techniques for public health surveillance using the NHANES and COVID-19 datasets.
+This project investigates privacy-preserving machine learning technoques for public health surveillance systems. The goal is to evaluate how different privacy methods affect model performance, privacy protection, and ethical considerations when using sensitive healthcare data.
 
-The project evaluates the trade-off between privacy protection and predictive utility across multiple machine learning models and privacy-preserving approaches.
-
-## Techniques
-
-Current implementation:
-- Differential Privacy (DP)
-
-Planned/extended techniques:
+The project compares multiple approaches, which includes:
+- Differential Privacy
 - Federated Learning (FL)
 - k-Anonymity
-- Homomorphic Encryption (HE)
+- Homomorphic Encryption
 
-## Models
+Experiments are conducted using public health datasets including the COVID-19 Case Surveillance dataset and NHANES 2013 - 2014.
 
-- Logistic Regression
-- Random Forest
+# Project Structure
 
-## Datasets
+```text
+privacy-ai-public-health/
+│
+├── datasets/        # Input datasets
+├── graphs/          # Generated visualisations
+├── results/         # CSV experiment outputs
+├── src/             # Python experiment scripts
+├── README.md
+├── requirements.txt
+└── .gitignore
+```
+# Requirements
 
-### NHANES
-National Health and Nutrition Examination Survey (NHANES) dataset used for diabetes classification.
+This project was tested using the following:
+- Python 3.11
+- scikit-learn 1.6.1
+- diffprivlib 0.66
+Python 3.14 may cause compatibility issues with diffprivlib and newer scikit-learn versions.
 
-### COVID-19 Case Surveillance
-COVID-19 Case Surveillance Public Use dataset used for mortality prediction.
+# Setup
 
-## Evaluation Metrics
+Create and activate a virtual enviornment:
 
-The experiments evaluate:
+python3.11 -m venv privacy_env
+source privacy_env/bin/activate
+
+Install dependencies:
+
+pip install -r requirements.txt
+
+# COVID-19 Dataset
+
+The COVID-19 Case Surveillance dataset is too large to store directly in the Github repo. 
+
+Download the dataset from Kaggle:
+
+https://www.kaggle.com/datasets/arashnic/covid19-case-surveillance-public-use-dataset
+
+After downloading, place place the CSV file inside the datasets/ folder and rename it to:
+
+covid.csv
+
+Expected location:
+
+datasets/covid.csv
+
+# Running the Experiments
+
+## Merge NHANES files
+
+python src/merge_nhanes.py
+
+This creates:
+
+datasets/nhanes_merged.csv
+
+## Run NHANES Differential Privacy Experiment
+
+python src/nhanes_dp_experiment.py
+
+## Run COVID-19 Differential Privacy Experiment
+
+python src/covid_dp_experiment.py
+
+## Generate Visualisations
+
+python src/visualise_results.py
+
+Generated graphs will be saved inside:
+
+graphs/
+
+# Outputs
+
+Experiment results are automatically saved inside:
+
+results/
+
+Including:
+- Raw experiment outputs
+- Summary statistics
+- Averaged metrics across random seeds
+
+Metrics include:
 - Accuracy
 - F1 Score
 - Precision
 - Recall
-- Training Runtime
-- Confusion Matrices
-
-Experiments are repeated across 5 random seeds:
-- 1
-- 21
-- 42
-- 100
-- 123
-
-Differential Privacy experiments evaluate multiple epsilon values:
-- 10.0
-- 5.0
-- 1.0
-- 0.5
-- 0.1
-
-## Project Structure
-
-```text
-privacy-ai-public-health/
-├── datasets/
-├── graphs/
-├── results/
-├── src/
-├── requirements.txt
-├── README.md
-└── .gitignore
-```
-
-## Python Version
-
-This project was tested using:
-
-- Python 3.11
-
-Python 3.14 caused compatibility issues between:
-- diffprivlib
-- scikit-learn
-
-Specifically, diffprivlib's Logistic Regression implementation is currently incompatible with newer scikit-learn versions bundled with Python 3.14 environments.
-
-## Setup
-
-Create and activate a virtual environment:
-
-```bash
-python3.11 -m venv privacy_env
-source privacy_env/bin/activate
-```
-
-Install dependencies:
-
-```bash
-pip install -r requirements.txt
-```
-
-## Running the Project
-
-Run the NHANES preprocessing script:
-
-```bash
-python src/merge_nhanes.py
-```
-
-Run NHANES Differential Privacy experiments:
-
-```bash
-python src/nhanes_dp_experiment.py
-```
-
-Run COVID-19 Differential Privacy experiments:
-
-```bash
-python src/covid_dp_experiment.py
-```
-
-Generate visualisations:
-
-```bash
-python src/visualise_results.py
-```
-
-## Outputs
-
-### Results CSVs
-Saved in:
-
-```text
-results/
-```
-
-### Visualisations
-Saved in:
-
-```text
-graphs/
-```
-
-## Notes
-
-- Differential Privacy models use `diffprivlib`.
-- Baseline models use standard scikit-learn implementations.
-- Differential Privacy experiments compare privacy-performance trade-offs across multiple epsilon values.
-- Lower epsilon values provide stronger privacy but may reduce predictive performance.
-
-## Authors
-
-- Ansh Humagain
-- Akshay Singh
-- Luca Martins
-- Sanskar Fadatare
-- Dylan Chum
+- Training runtime
