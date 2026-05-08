@@ -23,7 +23,7 @@ print("Loading COVID dataset...")
 df = pd.read_csv(DATA_DIR / 'covid.csv', low_memory=False)
 print(f"Full dataset shape: {df.shape}")
 
-features = ['sex', 'age_group', 'hosp_yn', 'icu_yn', 'medcond_yn']
+features = ['sex', 'age_group', 'medcond_yn']
 target = 'death_yn'
 
 df = df[features + [target]].copy()

@@ -24,8 +24,9 @@ df = pd.read_csv(DATA_DIR / 'nhanes_merged.csv')
 
 features = [
     'RIDAGEYR', 'RIAGENDR', 'INDFMPIR',
-    'LBXGH', 'LBXSGL', 'LBXTC', 'LBXTR', 'LBDLDL', 'LBDHDD',
+    'LBXTC', 'LBXTR', 'LBDLDL', 'LBDHDD',
 ]
+
 features = [f for f in features if f in df.columns]
 target = 'DIQ010'
 
