@@ -1,0 +1,71 @@
+Seed,Model,Privacy Setting,Accuracy,F1 Score,Precision,Recall,Train Time (s),Predict Time (s)
+1,Logistic Regression,Baseline (No Privacy),0.9509,0.4869,0.6384,0.3936,0.0167,0.0005
+1,Random Forest,Baseline (No Privacy),0.9503,0.4975,0.6196,0.4155,0.4899,0.0524
+1,Logistic Regression Balanced,Baseline (No Privacy),0.9009,0.5233,0.3658,0.9189,0.0204,0.0005
+1,Random Forest Balanced,Baseline (No Privacy),0.8912,0.5023,0.3444,0.9274,0.5204,0.0422
+1,DP Logistic Regression,DP e=10.0,0.9509,0.4869,0.6384,0.3936,0.0158,0.0005
+1,DP Random Forest,DP e=10.0,0.9505,0.5055,0.6186,0.4274,0.0398,0.003
+1,DP Logistic Regression,DP e=5.0,0.9509,0.4869,0.6384,0.3936,0.0156,0.0004
+1,DP Random Forest,DP e=5.0,0.9408,0.0,0.0,0.0,0.0364,0.0029
+1,DP Logistic Regression,DP e=1.0,0.9421,0.5097,0.511,0.5084,0.026,0.0004
+1,DP Random Forest,DP e=1.0,0.9453,0.192,0.7647,0.1098,0.0373,0.0034
+1,DP Logistic Regression,DP e=0.5,0.9512,0.5,0.6354,0.4122,0.017,0.0005
+1,DP Random Forest,DP e=0.5,0.9474,0.5174,0.5663,0.4764,0.0356,0.0027
+1,DP Logistic Regression,DP e=0.1,0.9442,0.3786,0.5556,0.2872,0.0155,0.0004
+1,DP Random Forest,DP e=0.1,0.951,0.482,0.6441,0.3851,0.0355,0.0026
+21,Logistic Regression,Baseline (No Privacy),0.9524,0.5172,0.6472,0.4307,0.013,0.0004
+21,Random Forest,Baseline (No Privacy),0.9523,0.5319,0.6347,0.4578,0.5025,0.0403
+21,Logistic Regression Balanced,Baseline (No Privacy),0.9041,0.5264,0.3719,0.9003,0.0187,0.0004
+21,Random Forest Balanced,Baseline (No Privacy),0.8976,0.5165,0.3585,0.924,0.4829,0.0402
+21,DP Logistic Regression,DP e=10.0,0.9524,0.5172,0.6472,0.4307,0.0142,0.0004
+21,DP Random Forest,DP e=10.0,0.9514,0.5637,0.6015,0.5304,0.0345,0.0024
+21,DP Logistic Regression,DP e=5.0,0.9524,0.5172,0.6472,0.4307,0.0138,0.0004
+21,DP Random Forest,DP e=5.0,0.9463,0.251,0.72,0.152,0.0348,0.0025
+21,DP Logistic Regression,DP e=1.0,0.9513,0.5762,0.5943,0.5591,0.0271,0.0004
+21,DP Random Forest,DP e=1.0,0.9436,0.2897,0.5693,0.1943,0.0351,0.0023
+21,DP Logistic Regression,DP e=0.5,0.9527,0.5159,0.6545,0.4257,0.0137,0.0004
+21,DP Random Forest,DP e=0.5,0.9527,0.5474,0.6313,0.4831,0.0352,0.0027
+21,DP Logistic Regression,DP e=0.1,0.9514,0.5637,0.6015,0.5304,0.0163,0.0004
+21,DP Random Forest,DP e=0.1,0.9503,0.3902,0.713,0.2686,0.0351,0.0026
+42,Logistic Regression,Baseline (No Privacy),0.9534,0.5166,0.6694,0.4206,0.0128,0.0004
+42,Random Forest,Baseline (No Privacy),0.953,0.5281,0.651,0.4443,0.4969,0.04
+42,Logistic Regression Balanced,Baseline (No Privacy),0.8989,0.5174,0.3606,0.9155,0.0191,0.0003
+42,Random Forest Balanced,Baseline (No Privacy),0.897,0.5151,0.357,0.924,0.4791,0.0409
+42,DP Logistic Regression,DP e=10.0,0.9534,0.5166,0.6694,0.4206,0.0135,0.0004
+42,DP Random Forest,DP e=10.0,0.9537,0.5101,0.6827,0.4071,0.0344,0.0028
+42,DP Logistic Regression,DP e=5.0,0.9534,0.5166,0.6694,0.4206,0.0123,0.0004
+42,DP Random Forest,DP e=5.0,0.9521,0.5618,0.6128,0.5186,0.0352,0.0025
+42,DP Logistic Regression,DP e=1.0,0.9518,0.4382,0.7068,0.3176,0.0156,0.0004
+42,DP Random Forest,DP e=1.0,0.9517,0.4059,0.7466,0.2787,0.0344,0.0024
+42,DP Logistic Regression,DP e=0.5,0.9536,0.5167,0.6739,0.4189,0.0141,0.0003
+42,DP Random Forest,DP e=0.5,0.9522,0.5508,0.6208,0.4949,0.0343,0.0022
+42,DP Logistic Regression,DP e=0.1,0.9487,0.4781,0.601,0.397,0.0146,0.0003
+42,DP Random Forest,DP e=0.1,0.9506,0.4499,0.6601,0.3412,0.0336,0.0023
+100,Logistic Regression,Baseline (No Privacy),0.9493,0.4702,0.6164,0.3801,0.0142,0.0004
+100,Random Forest,Baseline (No Privacy),0.9488,0.4849,0.5995,0.4071,0.4824,0.0399
+100,Logistic Regression Balanced,Baseline (No Privacy),0.9007,0.5196,0.3641,0.9071,0.0191,0.0003
+100,Random Forest Balanced,Baseline (No Privacy),0.8867,0.4949,0.3362,0.9375,0.4722,0.0397
+100,DP Logistic Regression,DP e=10.0,0.9493,0.4702,0.6164,0.3801,0.0149,0.0003
+100,DP Random Forest,DP e=10.0,0.9408,0.0,0.0,0.0,0.0343,0.0025
+100,DP Logistic Regression,DP e=5.0,0.9493,0.4702,0.6164,0.3801,0.0146,0.0003
+100,DP Random Forest,DP e=5.0,0.9479,0.5189,0.5723,0.4747,0.034,0.0025
+100,DP Logistic Regression,DP e=1.0,0.9486,0.486,0.5956,0.4105,0.0133,0.0003
+100,DP Random Forest,DP e=1.0,0.9408,0.0,0.0,0.0,0.0336,0.0023
+100,DP Logistic Regression,DP e=0.5,0.9492,0.4697,0.6148,0.3801,0.0146,0.0004
+100,DP Random Forest,DP e=0.5,0.9494,0.4651,0.6215,0.3716,0.034,0.0024
+100,DP Logistic Regression,DP e=0.1,0.944,0.5105,0.529,0.4932,0.0133,0.0004
+100,DP Random Forest,DP e=0.1,0.9408,0.0,0.0,0.0,0.0339,0.0024
+123,Logistic Regression,Baseline (No Privacy),0.9521,0.492,0.661,0.3919,0.0136,0.0004
+123,Random Forest,Baseline (No Privacy),0.9513,0.4985,0.6385,0.4088,0.4848,0.0397
+123,Logistic Regression Balanced,Baseline (No Privacy),0.904,0.5303,0.3733,0.9155,0.0182,0.0003
+123,Random Forest Balanced,Baseline (No Privacy),0.8921,0.5062,0.3471,0.9341,0.4759,0.0412
+123,DP Logistic Regression,DP e=10.0,0.9521,0.492,0.661,0.3919,0.0148,0.0004
+123,DP Random Forest,DP e=10.0,0.9514,0.538,0.6152,0.478,0.0354,0.0024
+123,DP Logistic Regression,DP e=5.0,0.9521,0.492,0.661,0.3919,0.0142,0.0003
+123,DP Random Forest,DP e=5.0,0.9517,0.4801,0.6617,0.3767,0.0347,0.0025
+123,DP Logistic Regression,DP e=1.0,0.9507,0.5481,0.5992,0.5051,0.0236,0.0003
+123,DP Random Forest,DP e=1.0,0.9425,0.103,0.6735,0.0557,0.0347,0.0024
+123,DP Logistic Regression,DP e=0.5,0.951,0.4896,0.6386,0.397,0.0127,0.0003
+123,DP Random Forest,DP e=0.5,0.9496,0.418,0.6606,0.3057,0.0345,0.0025
+123,DP Logistic Regression,DP e=0.1,0.9479,0.4567,0.5967,0.3699,0.0132,0.0003
+123,DP Random Forest,DP e=0.1,0.944,0.1277,0.82,0.0693,0.0351,0.0025
