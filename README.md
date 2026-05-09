@@ -62,6 +62,12 @@ Then retry:
 
 pip install tenseal
 
+# Federated Learning Setup
+
+The Federated Learning experiments use a simulated cross-silo setup where the training data is split into five local clients, with each client training a local model. The model updates are combined using federated averaging, and raw training data is not transferred between clients in the simulation.
+
+This is a local simulation rather than a real distributed deployment, and thus communication security, secure aggregation and network latency are outside the scope of this implementation.
+
 # COVID-19 Dataset
 
 The COVID-19 Case Surveillance dataset is too large to store directly in the Github repo. 
@@ -96,9 +102,17 @@ python src/nhanes_dp_experiment.py
 
 python src/covid_dp_experiment.py
 
-## Run Homorphic Encryption Experiment
+## Run NHANES Homorphic Encryption Experiment
 
 python src/he_nhanes_experiment.py
+
+## Run NHANES Federated Learning Experiment
+
+python src/nhanes_fl_experiment.py
+
+## Run COVID-19 Federated Learning Experiment
+
+python src/covid_fl_experiment.py
 
 ## Generate Differential Privacy Visualisations
 
@@ -110,7 +124,11 @@ graphs/
 
 ## Generate Homomorphic Encryption Visualisations
 
-python src/ visualise_he_results.py
+python src/visualise_he_results.py
+
+## Generate Federated Learning Visualisations
+
+python src/visualise_fl_results.py
 
 # Outputs
 

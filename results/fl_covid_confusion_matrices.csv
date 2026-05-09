@@ -1,0 +1,21 @@
+Dataset,Seed,Model,Privacy Setting,Actual Class,Predicted 0,Predicted 1
+COVID-19,42,Logistic Regression,Baseline (No Privacy),0,8206,1308
+COVID-19,42,Logistic Regression,Baseline (No Privacy),1,42,444
+COVID-19,42,Federated Logistic Regression,"FL (5 clients, 20 rounds)",0,8190,1324
+COVID-19,42,Federated Logistic Regression,"FL (5 clients, 20 rounds)",1,40,446
+COVID-19,43,Logistic Regression,Baseline (No Privacy),0,8174,1340
+COVID-19,43,Logistic Regression,Baseline (No Privacy),1,44,442
+COVID-19,43,Federated Logistic Regression,"FL (5 clients, 20 rounds)",0,8182,1332
+COVID-19,43,Federated Logistic Regression,"FL (5 clients, 20 rounds)",1,45,441
+COVID-19,44,Logistic Regression,Baseline (No Privacy),0,8177,1337
+COVID-19,44,Logistic Regression,Baseline (No Privacy),1,43,443
+COVID-19,44,Federated Logistic Regression,"FL (5 clients, 20 rounds)",0,8218,1296
+COVID-19,44,Federated Logistic Regression,"FL (5 clients, 20 rounds)",1,44,442
+COVID-19,45,Logistic Regression,Baseline (No Privacy),0,8217,1297
+COVID-19,45,Logistic Regression,Baseline (No Privacy),1,49,437
+COVID-19,45,Federated Logistic Regression,"FL (5 clients, 20 rounds)",0,8152,1362
+COVID-19,45,Federated Logistic Regression,"FL (5 clients, 20 rounds)",1,47,439
+COVID-19,46,Logistic Regression,Baseline (No Privacy),0,8198,1316
+COVID-19,46,Logistic Regression,Baseline (No Privacy),1,53,433
+COVID-19,46,Federated Logistic Regression,"FL (5 clients, 20 rounds)",0,8350,1164
+COVID-19,46,Federated Logistic Regression,"FL (5 clients, 20 rounds)",1,61,425
