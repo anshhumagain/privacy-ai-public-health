@@ -12,12 +12,19 @@ from sklearn.preprocessing import MinMaxScaler
 
 warnings.filterwarnings('ignore')
 
-SEEDS = [1, 21, 42, 100, 123]
+SEEDS = [42, 43, 44, 45, 46]
 K_VALUES = [2, 5, 10, 20, 50, 100]
 
 print("Loading NHANES dataset...")
 
-DATA_PATH = Path(__file__).resolve().parent / "nhanes_merged.csv"
+BASE_DIR = Path(__file__).resolve().parents[1]
+
+DATASETS_DIR = BASE_DIR / "datasets"
+RESULTS_DIR = BASE_DIR / "results"
+
+RESULTS_DIR.mkdir(exist_ok=True)
+
+DATA_PATH = DATASETS_DIR / "nhanes_merged.csv"
 df = pd.read_csv(DATA_PATH, low_memory=False)
 
 print(f"Full dataset shape: {df.shape}")
@@ -35,26 +42,15 @@ if target not in df.columns:
 
 df = df[features + [target]].copy()
 
-# Convert target to numeric
 df[target] = pd.to_numeric(df[target], errors='coerce')
 
-# NHANES DIQ010:
-# 1 = Doctor told participant they have diabetes
-# 2 = No diabetes
 df = df[df[target].isin([1, 2])]
 df[target] = df[target].map({1: 1, 2: 0})
 
-# Convert feature columns to numeric
 for col in features:
     df[col] = pd.to_numeric(df[col], errors='coerce')
 
 df = df.dropna()
-
-# ------------------------------------------------------------
-# K-ANONYMITY GENERALISATION
-# ------------------------------------------------------------
-# For NHANES, raw continuous values create too many unique records.
-# So we generalise age and income into broader bands.
 
 if 'RIDAGEYR' in df.columns:
     df['AGE_BAND'] = pd.cut(
@@ -71,8 +67,6 @@ if 'INDFMPIR' in df.columns:
         labels=False,
         include_lowest=True
     )
-
-# Quasi-identifiers are the variables that may identify someone when combined
 quasi_identifiers = []
 
 if 'AGE_BAND' in df.columns:
@@ -84,7 +78,6 @@ if 'RIAGENDR' in df.columns:
 if 'INCOME_BAND' in df.columns:
     quasi_identifiers.append('INCOME_BAND')
 
-# Replace raw age and income with generalised versions for the model
 model_features = []
 
 for f in features:
@@ -95,7 +88,6 @@ for f in features:
     else:
         model_features.append(f)
 
-# Remove duplicate feature names
 model_features = list(dict.fromkeys(model_features))
 
 df = df.dropna(subset=model_features + quasi_identifiers + [target])
@@ -424,8 +416,23 @@ for _, row in seed_42_results.iterrows():
     print(f"  FN: {cm[1, 0]}  TP: {cm[1, 1]}")
 
 
-results_df.drop(columns=['Confusion Matrix']).to_csv('nhanes_k_anonymity_results_raw.csv', index=False)
-summary.to_csv('nhanes_k_anonymity_results_summary.csv', index=False)
-display_df.to_csv('nhanes_k_anonymity_results.csv', index=False)
+results_df.drop(columns=['Confusion Matrix']).to_csv(
+    RESULTS_DIR / "kanon_nhanes_results_raw.csv",
+    index=False
+)
 
-print("\nSaved nhanes_k_anonymity_results.csv, nhanes_k_anonymity_results_summary.csv, nhanes_k_anonymity_results_raw.csv")
+summary.to_csv(
+    RESULTS_DIR / "kanon_nhanes_results_summary.csv",
+    index=False
+)
+
+display_df.to_csv(
+    RESULTS_DIR / "kanon_nhanes_results.csv",
+    index=False
+)
+
+print(
+    "\nSaved kanon_nhanes_results.csv, "
+    "kanon_nhanes_results_summary.csv, "
+    "kanon_nhanes_results_raw.csv"
+)

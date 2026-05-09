@@ -13,23 +13,48 @@ from sklearn.preprocessing import MinMaxScaler, LabelEncoder
 
 warnings.filterwarnings('ignore')
 
-SEEDS = [1, 21, 42, 100, 123]
+SEEDS = [42, 43, 44, 45, 46]
 K_VALUES = [2, 5, 10, 20, 50, 100]
 
 print("Loading COVID dataset...")
-DATA_PATH = Path(__file__).resolve().parent / "COVID-19_Case_Surveillance_Public_Use_Data.csv"
+
+BASE_DIR = Path(__file__).resolve().parents[1]
+
+DATASETS_DIR = BASE_DIR / "datasets"
+RESULTS_DIR = BASE_DIR / "results"
+
+RESULTS_DIR.mkdir(exist_ok=True)
+
+COVID_CANDIDATES = [
+    "COVID-19_Case_Surveillance_Public_Use_Data.csv",
+    "covid.csv",
+    "covid_19_case_surveillance.csv",
+    "covid_case_surveillance.csv",
+]
+
+DATA_PATH = next(
+    (DATASETS_DIR / filename for filename in COVID_CANDIDATES if (DATASETS_DIR / filename).exists()),
+    None
+)
+
+if DATA_PATH is None:
+    available_files = [p.name for p in DATASETS_DIR.glob("*")]
+    raise FileNotFoundError(
+        "Could not find the COVID dataset in the datasets folder.\n"
+        f"Expected one of: {COVID_CANDIDATES}\n"
+        f"Available files in datasets/: {available_files}"
+    )
+
 df = pd.read_csv(DATA_PATH, low_memory=False)
 print(f"Full dataset shape: {df.shape}")
 
 features = ['sex', 'age_group', 'hosp_yn', 'icu_yn', 'medcond_yn']
 target = 'death_yn'
 
-# These are the variables that could identify a person when combined
 quasi_identifiers = features.copy()
 
 df = df[features + [target]].copy()
 
-# Remove missing / unknown values
 for col in df.columns:
     df = df[~df[col].isin(['Missing', 'Unknown', 'NA', 'NaN'])]
 
@@ -37,10 +62,8 @@ df = df.dropna()
 df = df[df[target].isin(['Yes', 'No'])]
 df[target] = df[target].map({'Yes': 1, 'No': 0})
 
-# Sample to make computation manageable
 df = df.sample(n=50000, random_state=42)
 
-# Encode categorical features
 label_encoders = {}
 for col in features:
     le = LabelEncoder()
@@ -214,7 +237,6 @@ for seed in SEEDS:
         stratify=df[target]
     )
 
-    # Baseline: no privacy
     X_train, X_test, y_train, y_test = scale_train_test(train_df, test_df)
 
     baseline_stats = {
@@ -242,7 +264,6 @@ for seed in SEEDS:
         privacy_stats=baseline_stats
     )})
 
-    # K-anonymity models
     for k in K_VALUES:
         label = f'K-anonymity k={k}'
 
@@ -362,8 +383,23 @@ for _, row in seed_42_results.iterrows():
     print(f"  FN: {cm[1, 0]}  TP: {cm[1, 1]}")
 
 
-results_df.drop(columns=['Confusion Matrix']).to_csv('covid_k_anonymity_results_raw.csv', index=False)
-summary.to_csv('covid_k_anonymity_results_summary.csv', index=False)
-display_df.to_csv('covid_k_anonymity_results.csv', index=False)
+results_df.drop(columns=['Confusion Matrix']).to_csv(
+    RESULTS_DIR / "kanon_covid_results_raw.csv",
+    index=False
+)
 
-print("\nSaved covid_k_anonymity_results.csv, covid_k_anonymity_results_summary.csv, covid_k_anonymity_results_raw.csv")
+summary.to_csv(
+    RESULTS_DIR / "kanon_covid_results_summary.csv",
+    index=False
+)
+
+display_df.to_csv(
+    RESULTS_DIR / "kanon_covid_results.csv",
+    index=False
+)
+
+print(
+    "\nSaved kanon_covid_results.csv, "
+    "kanon_covid_results_summary.csv, "
+    "kanon_covid_results_raw.csv"
+)

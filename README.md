@@ -68,6 +68,14 @@ The Federated Learning experiments use a simulated cross-silo setup where the tr
 
 This is a local simulation rather than a real distributed deployment, and thus communication security, secure aggregation and network latency are outside the scope of this implementation.
 
+# K-Anonymity Setup
+
+The K-anonymity experiments apply a supressed anonymisation to identifiers before model training.
+
+For NHANES, continuous variables like age and income are generalised into broader categorical bands to reduce re-identification risks. 
+
+Experiments evaluate multiple k-values to analyse the trade-off between privacy protection and predictive utility.
+
 # COVID-19 Dataset
 
 The COVID-19 Case Surveillance dataset is too large to store directly in the Github repo. 
@@ -113,6 +121,10 @@ python src/nhanes_fl_experiment.py
 ## Run COVID-19 Federated Learning Experiment
 
 python src/covid_fl_experiment.py
+
+## Run NHANES K-Anonymity Experiment
+
+python src/kanon_nhanes_experiment.py
 
 ## Generate Differential Privacy Visualisations
 

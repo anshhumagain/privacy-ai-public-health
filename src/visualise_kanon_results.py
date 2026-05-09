@@ -3,20 +3,20 @@ import matplotlib.pyplot as plt
 import numpy as np
 from pathlib import Path
 
+BASE_DIR = Path(__file__).resolve().parents[1]
 
-# ============================================================
-# LOAD FILES
-# ============================================================
+RESULTS_DIR = BASE_DIR / "results"
+GRAPHS_DIR = BASE_DIR / "graphs"
 
-BASE_DIR = Path(__file__).resolve().parent
+GRAPHS_DIR.mkdir(exist_ok=True)
 
 
 def load_summary(filename):
-    filepath = BASE_DIR / filename
+    filepath = RESULTS_DIR / filename
 
     if not filepath.exists():
         raise FileNotFoundError(
-            f"Could not find {filename}. Make sure it is in the same folder as visualise_results.py"
+            f"Could not find {filename} inside the results folder."
         )
 
     return pd.read_csv(filepath)
@@ -25,19 +25,12 @@ def load_summary(filename):
 def clean_dataset_name(dataset_name):
     return dataset_name.lower().replace("-", "_").replace(" ", "_")
 
-
-# ============================================================
-# ORDER + LABELS
-# ============================================================
-
 def prepare_k_order(summary):
     summary = summary.copy()
 
-    # Extract k value only from labels like: K-anonymity k=2
     summary["K"] = summary["Privacy Setting"].str.extract(r"k=(\d+)")
     summary["K"] = pd.to_numeric(summary["K"], errors="coerce")
 
-    # Only rows with actual K values are K-anonymity rows
     k_rows = summary[summary["K"].notna()].copy()
 
     k_logistic = k_rows[
@@ -86,21 +79,16 @@ def make_label(row):
 
     return str(model)
 
-
-# ============================================================
-# DP-STYLE K-ANONYMITY BAR GRAPH
-# ============================================================
-
 def plot_k_anonymity_performance(summary, dataset_name):
     summary = prepare_k_order(summary)
 
     metrics = ["Accuracy", "F1 Score", "Precision", "Recall"]
 
     colors = {
-        "Accuracy": "#2196F3",     # blue
-        "F1 Score": "#4CAF50",     # green
-        "Precision": "#FF9800",   # orange
-        "Recall": "#F44336"       # red
+        "Accuracy": "#2196F3",
+        "F1 Score": "#4CAF50",
+        "Precision": "#FF9800",
+        "Recall": "#F44336"
     }
 
     labels = [make_label(row) for _, row in summary.iterrows()]
@@ -175,20 +163,15 @@ def plot_k_anonymity_performance(summary, dataset_name):
     plt.tight_layout()
 
     filename = f"{clean_dataset_name(dataset_name)}_k_anonymity_performance.png"
-    output_path = BASE_DIR / filename
+    output_path = GRAPHS_DIR / filename
 
     plt.savefig(output_path, dpi=150, bbox_inches="tight")
     plt.show()
 
     print(f"Saved: {filename}")
 
-
-# ============================================================
-# RUN
-# ============================================================
-
-nhanes = load_summary("nhanes_k_anonymity_results_summary.csv")
-covid = load_summary("covid_k_anonymity_results_summary.csv")
+nhanes = load_summary("kanon_nhanes_results_summary.csv")
+covid = load_summary("kanon_covid_results_summary.csv")
 
 plot_k_anonymity_performance(nhanes, "NHANES")
 plot_k_anonymity_performance(covid, "COVID-19")
