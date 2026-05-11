@@ -1,21 +1,81 @@
 Dataset,Seed,Model,Privacy Setting,Actual Class,Predicted 0,Predicted 1
 NHANES,42,Logistic Regression,Baseline (No Privacy),0,446,58
 NHANES,42,Logistic Regression,Baseline (No Privacy),1,8,46
-NHANES,42,Federated Logistic Regression,"FL (5 clients, 20 rounds)",0,399,105
-NHANES,42,Federated Logistic Regression,"FL (5 clients, 20 rounds)",1,8,46
+NHANES,42,Random Forest,Baseline (No Privacy),0,493,11
+NHANES,42,Random Forest,Baseline (No Privacy),1,22,32
+NHANES,42,Federated Logistic Regression,"FL (3 clients, 10 rounds)",0,435,69
+NHANES,42,Federated Logistic Regression,"FL (3 clients, 10 rounds)",1,9,45
+NHANES,42,Federated Random Forest,"FL (3 clients, 10 rounds)",0,494,10
+NHANES,42,Federated Random Forest,"FL (3 clients, 10 rounds)",1,23,31
+NHANES,42,Federated Logistic Regression,"FL (5 clients, 20 rounds)",0,431,73
+NHANES,42,Federated Logistic Regression,"FL (5 clients, 20 rounds)",1,9,45
+NHANES,42,Federated Random Forest,"FL (5 clients, 20 rounds)",0,494,10
+NHANES,42,Federated Random Forest,"FL (5 clients, 20 rounds)",1,24,30
+NHANES,42,Federated Logistic Regression,"FL (10 clients, 20 rounds)",0,422,82
+NHANES,42,Federated Logistic Regression,"FL (10 clients, 20 rounds)",1,9,45
+NHANES,42,Federated Random Forest,"FL (10 clients, 20 rounds)",0,495,9
+NHANES,42,Federated Random Forest,"FL (10 clients, 20 rounds)",1,27,27
 NHANES,43,Logistic Regression,Baseline (No Privacy),0,445,59
 NHANES,43,Logistic Regression,Baseline (No Privacy),1,7,47
-NHANES,43,Federated Logistic Regression,"FL (5 clients, 20 rounds)",0,417,87
-NHANES,43,Federated Logistic Regression,"FL (5 clients, 20 rounds)",1,11,43
+NHANES,43,Random Forest,Baseline (No Privacy),0,494,10
+NHANES,43,Random Forest,Baseline (No Privacy),1,13,41
+NHANES,43,Federated Logistic Regression,"FL (3 clients, 10 rounds)",0,440,64
+NHANES,43,Federated Logistic Regression,"FL (3 clients, 10 rounds)",1,8,46
+NHANES,43,Federated Random Forest,"FL (3 clients, 10 rounds)",0,493,11
+NHANES,43,Federated Random Forest,"FL (3 clients, 10 rounds)",1,19,35
+NHANES,43,Federated Logistic Regression,"FL (5 clients, 20 rounds)",0,433,71
+NHANES,43,Federated Logistic Regression,"FL (5 clients, 20 rounds)",1,9,45
+NHANES,43,Federated Random Forest,"FL (5 clients, 20 rounds)",0,494,10
+NHANES,43,Federated Random Forest,"FL (5 clients, 20 rounds)",1,18,36
+NHANES,43,Federated Logistic Regression,"FL (10 clients, 20 rounds)",0,425,79
+NHANES,43,Federated Logistic Regression,"FL (10 clients, 20 rounds)",1,10,44
+NHANES,43,Federated Random Forest,"FL (10 clients, 20 rounds)",0,495,9
+NHANES,43,Federated Random Forest,"FL (10 clients, 20 rounds)",1,21,33
 NHANES,44,Logistic Regression,Baseline (No Privacy),0,456,48
 NHANES,44,Logistic Regression,Baseline (No Privacy),1,13,41
-NHANES,44,Federated Logistic Regression,"FL (5 clients, 20 rounds)",0,416,88
-NHANES,44,Federated Logistic Regression,"FL (5 clients, 20 rounds)",1,13,41
+NHANES,44,Random Forest,Baseline (No Privacy),0,490,14
+NHANES,44,Random Forest,Baseline (No Privacy),1,23,31
+NHANES,44,Federated Logistic Regression,"FL (3 clients, 10 rounds)",0,444,60
+NHANES,44,Federated Logistic Regression,"FL (3 clients, 10 rounds)",1,15,39
+NHANES,44,Federated Random Forest,"FL (3 clients, 10 rounds)",0,491,13
+NHANES,44,Federated Random Forest,"FL (3 clients, 10 rounds)",1,23,31
+NHANES,44,Federated Logistic Regression,"FL (5 clients, 20 rounds)",0,439,65
+NHANES,44,Federated Logistic Regression,"FL (5 clients, 20 rounds)",1,15,39
+NHANES,44,Federated Random Forest,"FL (5 clients, 20 rounds)",0,492,12
+NHANES,44,Federated Random Forest,"FL (5 clients, 20 rounds)",1,26,28
+NHANES,44,Federated Logistic Regression,"FL (10 clients, 20 rounds)",0,433,71
+NHANES,44,Federated Logistic Regression,"FL (10 clients, 20 rounds)",1,15,39
+NHANES,44,Federated Random Forest,"FL (10 clients, 20 rounds)",0,493,11
+NHANES,44,Federated Random Forest,"FL (10 clients, 20 rounds)",1,30,24
 NHANES,45,Logistic Regression,Baseline (No Privacy),0,446,58
 NHANES,45,Logistic Regression,Baseline (No Privacy),1,10,44
-NHANES,45,Federated Logistic Regression,"FL (5 clients, 20 rounds)",0,391,113
-NHANES,45,Federated Logistic Regression,"FL (5 clients, 20 rounds)",1,7,47
+NHANES,45,Random Forest,Baseline (No Privacy),0,495,9
+NHANES,45,Random Forest,Baseline (No Privacy),1,18,36
+NHANES,45,Federated Logistic Regression,"FL (3 clients, 10 rounds)",0,434,70
+NHANES,45,Federated Logistic Regression,"FL (3 clients, 10 rounds)",1,10,44
+NHANES,45,Federated Random Forest,"FL (3 clients, 10 rounds)",0,495,9
+NHANES,45,Federated Random Forest,"FL (3 clients, 10 rounds)",1,19,35
+NHANES,45,Federated Logistic Regression,"FL (5 clients, 20 rounds)",0,432,72
+NHANES,45,Federated Logistic Regression,"FL (5 clients, 20 rounds)",1,11,43
+NHANES,45,Federated Random Forest,"FL (5 clients, 20 rounds)",0,496,8
+NHANES,45,Federated Random Forest,"FL (5 clients, 20 rounds)",1,17,37
+NHANES,45,Federated Logistic Regression,"FL (10 clients, 20 rounds)",0,426,78
+NHANES,45,Federated Logistic Regression,"FL (10 clients, 20 rounds)",1,11,43
+NHANES,45,Federated Random Forest,"FL (10 clients, 20 rounds)",0,495,9
+NHANES,45,Federated Random Forest,"FL (10 clients, 20 rounds)",1,20,34
 NHANES,46,Logistic Regression,Baseline (No Privacy),0,436,68
 NHANES,46,Logistic Regression,Baseline (No Privacy),1,5,49
-NHANES,46,Federated Logistic Regression,"FL (5 clients, 20 rounds)",0,387,117
+NHANES,46,Random Forest,Baseline (No Privacy),0,495,9
+NHANES,46,Random Forest,Baseline (No Privacy),1,17,37
+NHANES,46,Federated Logistic Regression,"FL (3 clients, 10 rounds)",0,426,78
+NHANES,46,Federated Logistic Regression,"FL (3 clients, 10 rounds)",1,7,47
+NHANES,46,Federated Random Forest,"FL (3 clients, 10 rounds)",0,494,10
+NHANES,46,Federated Random Forest,"FL (3 clients, 10 rounds)",1,19,35
+NHANES,46,Federated Logistic Regression,"FL (5 clients, 20 rounds)",0,422,82
 NHANES,46,Federated Logistic Regression,"FL (5 clients, 20 rounds)",1,7,47
+NHANES,46,Federated Random Forest,"FL (5 clients, 20 rounds)",0,494,10
+NHANES,46,Federated Random Forest,"FL (5 clients, 20 rounds)",1,21,33
+NHANES,46,Federated Logistic Regression,"FL (10 clients, 20 rounds)",0,421,83
+NHANES,46,Federated Logistic Regression,"FL (10 clients, 20 rounds)",1,8,46
+NHANES,46,Federated Random Forest,"FL (10 clients, 20 rounds)",0,495,9
+NHANES,46,Federated Random Forest,"FL (10 clients, 20 rounds)",1,23,31

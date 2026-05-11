@@ -5,9 +5,9 @@ import warnings
 import numpy as np
 import pandas as pd
 
-from sklearn.linear_model import LogisticRegression, SGDClassifier
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score, confusion_matrix
-from sklearn.utils.class_weight import compute_class_weight
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler
 
@@ -20,48 +20,16 @@ RESULTS_DIR = BASE_DIR / "results"
 RESULTS_DIR.mkdir(exist_ok=True)
 
 RANDOM_SEEDS = [42, 43, 44, 45, 46]
-N_CLIENTS = 5
-N_ROUNDS = 20
-LOCAL_EPOCHS = 1
-
-DATASET_PATH = DATASETS_DIR / "nhanes_merged.csv"
+FL_SETTINGS = [
+    (3, 10),
+    (5, 20),
+    (10, 20),
+]
 
 RAW_RESULTS_PATH = RESULTS_DIR / "fl_nhanes_results_raw.csv"
 SUMMARY_RESULTS_PATH = RESULTS_DIR / "fl_nhanes_results_summary.csv"
 MAIN_RESULTS_PATH = RESULTS_DIR / "fl_nhanes_results.csv"
 CONFUSION_RESULTS_PATH = RESULTS_DIR / "fl_nhanes_confusion_matrices.csv"
-
-df = pd.read_csv(DATASET_PATH)
-
-features = [
-    "RIDAGEYR",
-    "RIAGENDR",
-    "INDFMPIR",
-    "LBXGH",
-    "LBXSGL",
-    "LBXTC",
-    "LBXTR",
-    "LBDLDL",
-    "LBDHDD",
-]
-
-features = [feature for feature in features if feature in df.columns]
-target = "DIQ010"
-
-df = df[features + [target]].copy()
-df = df[df[target].isin([1, 2])]
-df[target] = df[target].map({1: 1, 2: 0})
-df = df.dropna()
-
-print("NHANES cleaned dataset shape:", df.shape)
-print("NHANES target distribution:")
-print(df[target].value_counts())
-
-X = df[features]
-y = df[target]
-
-scaler = MinMaxScaler()
-X_scaled = pd.DataFrame(scaler.fit_transform(X), columns=X.columns)
 
 
 def calculate_metrics(y_true, predictions):
@@ -77,131 +45,157 @@ def split_clients(X_train, y_train, n_clients):
     indices = np.arange(len(X_train))
     client_indices = np.array_split(indices, n_clients)
 
-    X_array = np.asarray(X_train)
-    y_array = np.asarray(y_train)
+    X_array = X_train.to_numpy()
+    y_array = y_train.to_numpy()
 
-    clients = []
-
-    for idx in client_indices:
-        clients.append((X_array[idx], y_array[idx]))
-
-    return clients
+    return [(X_array[idx], y_array[idx]) for idx in client_indices]
 
 
-def sigmoid(x):
-    return 1 / (1 + np.exp(-x))
+def run_baseline_lr(X_train, X_test, y_train, y_test, seed):
+    model = LogisticRegression(max_iter=1000, random_state=seed, class_weight="balanced")
 
-
-def federated_predict(X_test, global_weights, global_bias):
-    scores = np.asarray(X_test).dot(global_weights.reshape(-1)) + global_bias
-    probabilities = sigmoid(scores)
-    return (probabilities >= 0.5).astype(int)
-
-
-def run_baseline(X_train, X_test, y_train, y_test, seed):
-    start_time = time.time()
-
-    model = LogisticRegression(
-    max_iter=1000,
-    random_state=seed,
-    class_weight="balanced"
-)
+    start = time.time()
     model.fit(X_train, y_train)
-
     predictions = model.predict(X_test)
-    train_time = time.time() - start_time
-
-    metrics = calculate_metrics(y_test, predictions)
+    runtime = time.time() - start
 
     return {
         "Dataset": "NHANES",
         "Seed": seed,
         "Model": "Logistic Regression",
         "Privacy Setting": "Baseline (No Privacy)",
-        **metrics,
-        "Train Time (s)": train_time,
+        **calculate_metrics(y_test, predictions),
+        "Train Time (s)": runtime,
     }, predictions
 
 
-def run_federated_learning(X_train, X_test, y_train, y_test, seed):
-    start_time = time.time()
-
-    clients = split_clients(X_train, y_train, N_CLIENTS)
-    n_features = X_train.shape[1]
-
-    global_weights = np.zeros((1, n_features))
-    global_bias = np.zeros(1)
-    classes = np.array([0, 1])
-
-    class_weights_array = compute_class_weight(
+def run_baseline_rf(X_train, X_test, y_train, y_test, seed):
+    model = RandomForestClassifier(
+        n_estimators=100,
+        random_state=seed,
         class_weight="balanced",
-        classes=classes,
-        y=np.asarray(y_train)
     )
 
-    class_weights = {
-        0: class_weights_array[0],
-        1: class_weights_array[1],
-    }
+    start = time.time()
+    model.fit(X_train, y_train)
+    predictions = model.predict(X_test)
+    runtime = time.time() - start
 
-    for _ in range(N_ROUNDS):
-        local_weights = []
-        local_biases = []
-        sample_counts = []
+    return {
+        "Dataset": "NHANES",
+        "Seed": seed,
+        "Model": "Random Forest",
+        "Privacy Setting": "Baseline (No Privacy)",
+        **calculate_metrics(y_test, predictions),
+        "Train Time (s)": runtime,
+    }, predictions
 
-        for X_client, y_client in clients:
-            local_model = SGDClassifier(
-                loss="log_loss",
-                max_iter=LOCAL_EPOCHS,
-                tol=None,
-                learning_rate="constant",
-                eta0=0.01,
-                random_state=seed,
-                warm_start=True,
-                class_weight=class_weights,
+
+def run_federated_lr(X_train, X_test, y_train, y_test, seed, n_clients, n_rounds):
+    clients = split_clients(X_train, y_train, n_clients)
+
+    client_models = []
+    start = time.time()
+
+    for round_idx in range(n_rounds):
+        for client_idx, (X_client, y_client) in enumerate(clients):
+            model = LogisticRegression(
+                max_iter=1000,
+                random_state=seed + round_idx + client_idx,
+                class_weight="balanced",
             )
+            model.fit(X_client, y_client)
+            client_models.append(model)
 
-            local_model.partial_fit(X_client, y_client, classes=classes)
-            local_model.coef_ = global_weights.copy()
-            local_model.intercept_ = global_bias.copy()
-            local_model.partial_fit(X_client, y_client, classes=classes)
+    probabilities = np.mean(
+        [model.predict_proba(X_test)[:, 1] for model in client_models],
+        axis=0,
+    )
 
-            local_weights.append(local_model.coef_.copy())
-            local_biases.append(local_model.intercept_.copy())
-            sample_counts.append(len(y_client))
-
-        total_samples = sum(sample_counts)
-
-        global_weights = sum(
-            weight * (count / total_samples)
-            for weight, count in zip(local_weights, sample_counts)
-        )
-
-        global_bias = sum(
-            bias * (count / total_samples)
-            for bias, count in zip(local_biases, sample_counts)
-        )
-
-    predictions = federated_predict(X_test, global_weights, global_bias)
-    train_time = time.time() - start_time
-
-    metrics = calculate_metrics(y_test, predictions)
+    predictions = (probabilities >= 0.5).astype(int)
+    runtime = time.time() - start
 
     return {
         "Dataset": "NHANES",
         "Seed": seed,
         "Model": "Federated Logistic Regression",
-        "Privacy Setting": f"FL ({N_CLIENTS} clients, {N_ROUNDS} rounds)",
-        **metrics,
-        "Train Time (s)": train_time,
+        "Privacy Setting": f"FL ({n_clients} clients, {n_rounds} rounds)",
+        **calculate_metrics(y_test, predictions),
+        "Train Time (s)": runtime,
     }, predictions
 
+
+def run_federated_rf(X_train, X_test, y_train, y_test, seed, n_clients, n_rounds):
+    clients = split_clients(X_train, y_train, n_clients)
+
+    client_models = []
+    start = time.time()
+
+    for round_idx in range(n_rounds):
+        for client_idx, (X_client, y_client) in enumerate(clients):
+            model = RandomForestClassifier(
+                n_estimators=20,
+                random_state=seed + round_idx + client_idx,
+                class_weight="balanced",
+            )
+            model.fit(X_client, y_client)
+            client_models.append(model)
+
+    probabilities = np.mean(
+        [model.predict_proba(X_test)[:, 1] for model in client_models],
+        axis=0,
+    )
+
+    predictions = (probabilities >= 0.5).astype(int)
+    runtime = time.time() - start
+
+    return {
+        "Dataset": "NHANES",
+        "Seed": seed,
+        "Model": "Federated Random Forest",
+        "Privacy Setting": f"FL ({n_clients} clients, {n_rounds} rounds)",
+        **calculate_metrics(y_test, predictions),
+        "Train Time (s)": runtime,
+    }, predictions
+
+
+df = pd.read_csv(DATASETS_DIR / "nhanes_merged.csv", low_memory=False)
+
+features = [
+    "RIDAGEYR",
+    "RIAGENDR",
+    "INDFMPIR",
+    "LBXGH",
+    "LBXSGL",
+    "LBXTC",
+    "LBXTR",
+    "LBDLDL",
+    "LBDHDD",
+]
+
+features = [f for f in features if f in df.columns]
+target = "DIQ010"
+
+df = df[features + [target]].copy()
+df = df[df[target].isin([1, 2])]
+df[target] = df[target].map({1: 1, 2: 0})
+df = df.dropna()
+
+X = df[features]
+y = df[target]
+
+scaler = MinMaxScaler()
+X_scaled = pd.DataFrame(scaler.fit_transform(X), columns=X.columns)
+
+print("NHANES FL cleaned dataset shape:", X_scaled.shape)
+print("NHANES FL target distribution:")
+print(y.value_counts())
 
 all_results = []
 all_confusion_matrices = []
 
 for seed in RANDOM_SEEDS:
-    print(f"\nRunning NHANES FL experiments with random seed {seed}")
+    print(f"\n{'=' * 60} SEED {seed} {'=' * 60}")
 
     X_train, X_test, y_train, y_test = train_test_split(
         X_scaled,
@@ -211,43 +205,34 @@ for seed in RANDOM_SEEDS:
         stratify=y,
     )
 
-    baseline_result, baseline_predictions = run_baseline(
-        X_train, X_test, y_train, y_test, seed
-    )
+    experiment_runs = [
+        run_baseline_lr(X_train, X_test, y_train, y_test, seed),
+        run_baseline_rf(X_train, X_test, y_train, y_test, seed),
+    ]
 
-    fl_result, fl_predictions = run_federated_learning(
-        X_train, X_test, y_train, y_test, seed
-    )
+    for n_clients, n_rounds in FL_SETTINGS:
+        experiment_runs.append(
+            run_federated_lr(X_train, X_test, y_train, y_test, seed, n_clients, n_rounds)
+        )
+        experiment_runs.append(
+            run_federated_rf(X_train, X_test, y_train, y_test, seed, n_clients, n_rounds)
+        )
 
-    all_results.append(baseline_result)
-    all_results.append(fl_result)
+    for result, predictions in experiment_runs:
+        all_results.append(result)
 
-    for model_name, privacy_setting, predictions in [
-        ("Logistic Regression", "Baseline (No Privacy)", baseline_predictions),
-        ("Federated Logistic Regression", f"FL ({N_CLIENTS} clients, {N_ROUNDS} rounds)", fl_predictions),
-    ]:
         cm = confusion_matrix(y_test, predictions)
 
-        all_confusion_matrices.append({
-            "Dataset": "NHANES",
-            "Seed": seed,
-            "Model": model_name,
-            "Privacy Setting": privacy_setting,
-            "Actual Class": 0,
-            "Predicted 0": cm[0][0],
-            "Predicted 1": cm[0][1],
-        })
-
-        all_confusion_matrices.append({
-            "Dataset": "NHANES",
-            "Seed": seed,
-            "Model": model_name,
-            "Privacy Setting": privacy_setting,
-            "Actual Class": 1,
-            "Predicted 0": cm[1][0],
-            "Predicted 1": cm[1][1],
-        })
-
+        for actual_class in [0, 1]:
+            all_confusion_matrices.append({
+                "Dataset": "NHANES",
+                "Seed": seed,
+                "Model": result["Model"],
+                "Privacy Setting": result["Privacy Setting"],
+                "Actual Class": actual_class,
+                "Predicted 0": cm[actual_class][0],
+                "Predicted 1": cm[actual_class][1],
+            })
 
 raw_results = pd.DataFrame(all_results)
 raw_results.to_csv(RAW_RESULTS_PATH, index=False)
@@ -308,11 +293,5 @@ main_results = main_results[
 
 main_results.to_csv(MAIN_RESULTS_PATH, index=False)
 
-print("\nSaved NHANES FL files:")
-print(f"- {RAW_RESULTS_PATH}")
-print(f"- {SUMMARY_RESULTS_PATH}")
-print(f"- {MAIN_RESULTS_PATH}")
-print(f"- {CONFUSION_RESULTS_PATH}")
-
-print("\nNHANES FL summary:")
+print("\nSaved NHANES FL files.")
 print(main_results)

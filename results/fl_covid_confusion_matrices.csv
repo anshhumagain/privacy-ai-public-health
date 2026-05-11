@@ -1,21 +1,81 @@
 Dataset,Seed,Model,Privacy Setting,Actual Class,Predicted 0,Predicted 1
 COVID-19,42,Logistic Regression,Baseline (No Privacy),0,8206,1308
 COVID-19,42,Logistic Regression,Baseline (No Privacy),1,42,444
-COVID-19,42,Federated Logistic Regression,"FL (5 clients, 20 rounds)",0,8190,1324
-COVID-19,42,Federated Logistic Regression,"FL (5 clients, 20 rounds)",1,40,446
+COVID-19,42,Random Forest,Baseline (No Privacy),0,8773,741
+COVID-19,42,Random Forest,Baseline (No Privacy),1,81,405
+COVID-19,42,Federated Logistic Regression,"FL (3 clients, 10 rounds)",0,8215,1299
+COVID-19,42,Federated Logistic Regression,"FL (3 clients, 10 rounds)",1,42,444
+COVID-19,42,Federated Random Forest,"FL (3 clients, 10 rounds)",0,9056,458
+COVID-19,42,Federated Random Forest,"FL (3 clients, 10 rounds)",1,160,326
+COVID-19,42,Federated Logistic Regression,"FL (5 clients, 20 rounds)",0,8215,1299
+COVID-19,42,Federated Logistic Regression,"FL (5 clients, 20 rounds)",1,42,444
+COVID-19,42,Federated Random Forest,"FL (5 clients, 20 rounds)",0,9146,368
+COVID-19,42,Federated Random Forest,"FL (5 clients, 20 rounds)",1,186,300
+COVID-19,42,Federated Logistic Regression,"FL (10 clients, 20 rounds)",0,8214,1300
+COVID-19,42,Federated Logistic Regression,"FL (10 clients, 20 rounds)",1,41,445
+COVID-19,42,Federated Random Forest,"FL (10 clients, 20 rounds)",0,9231,283
+COVID-19,42,Federated Random Forest,"FL (10 clients, 20 rounds)",1,231,255
 COVID-19,43,Logistic Regression,Baseline (No Privacy),0,8174,1340
 COVID-19,43,Logistic Regression,Baseline (No Privacy),1,44,442
-COVID-19,43,Federated Logistic Regression,"FL (5 clients, 20 rounds)",0,8182,1332
+COVID-19,43,Random Forest,Baseline (No Privacy),0,8779,735
+COVID-19,43,Random Forest,Baseline (No Privacy),1,96,390
+COVID-19,43,Federated Logistic Regression,"FL (3 clients, 10 rounds)",0,8185,1329
+COVID-19,43,Federated Logistic Regression,"FL (3 clients, 10 rounds)",1,45,441
+COVID-19,43,Federated Random Forest,"FL (3 clients, 10 rounds)",0,9029,485
+COVID-19,43,Federated Random Forest,"FL (3 clients, 10 rounds)",1,161,325
+COVID-19,43,Federated Logistic Regression,"FL (5 clients, 20 rounds)",0,8188,1326
 COVID-19,43,Federated Logistic Regression,"FL (5 clients, 20 rounds)",1,45,441
+COVID-19,43,Federated Random Forest,"FL (5 clients, 20 rounds)",0,9173,341
+COVID-19,43,Federated Random Forest,"FL (5 clients, 20 rounds)",1,201,285
+COVID-19,43,Federated Logistic Regression,"FL (10 clients, 20 rounds)",0,8191,1323
+COVID-19,43,Federated Logistic Regression,"FL (10 clients, 20 rounds)",1,45,441
+COVID-19,43,Federated Random Forest,"FL (10 clients, 20 rounds)",0,9266,248
+COVID-19,43,Federated Random Forest,"FL (10 clients, 20 rounds)",1,233,253
 COVID-19,44,Logistic Regression,Baseline (No Privacy),0,8177,1337
 COVID-19,44,Logistic Regression,Baseline (No Privacy),1,43,443
-COVID-19,44,Federated Logistic Regression,"FL (5 clients, 20 rounds)",0,8218,1296
-COVID-19,44,Federated Logistic Regression,"FL (5 clients, 20 rounds)",1,44,442
+COVID-19,44,Random Forest,Baseline (No Privacy),0,8743,771
+COVID-19,44,Random Forest,Baseline (No Privacy),1,82,404
+COVID-19,44,Federated Logistic Regression,"FL (3 clients, 10 rounds)",0,8190,1324
+COVID-19,44,Federated Logistic Regression,"FL (3 clients, 10 rounds)",1,43,443
+COVID-19,44,Federated Random Forest,"FL (3 clients, 10 rounds)",0,9045,469
+COVID-19,44,Federated Random Forest,"FL (3 clients, 10 rounds)",1,141,345
+COVID-19,44,Federated Logistic Regression,"FL (5 clients, 20 rounds)",0,8189,1325
+COVID-19,44,Federated Logistic Regression,"FL (5 clients, 20 rounds)",1,43,443
+COVID-19,44,Federated Random Forest,"FL (5 clients, 20 rounds)",0,9186,328
+COVID-19,44,Federated Random Forest,"FL (5 clients, 20 rounds)",1,191,295
+COVID-19,44,Federated Logistic Regression,"FL (10 clients, 20 rounds)",0,8206,1308
+COVID-19,44,Federated Logistic Regression,"FL (10 clients, 20 rounds)",1,43,443
+COVID-19,44,Federated Random Forest,"FL (10 clients, 20 rounds)",0,9271,243
+COVID-19,44,Federated Random Forest,"FL (10 clients, 20 rounds)",1,221,265
 COVID-19,45,Logistic Regression,Baseline (No Privacy),0,8217,1297
 COVID-19,45,Logistic Regression,Baseline (No Privacy),1,49,437
-COVID-19,45,Federated Logistic Regression,"FL (5 clients, 20 rounds)",0,8152,1362
-COVID-19,45,Federated Logistic Regression,"FL (5 clients, 20 rounds)",1,47,439
+COVID-19,45,Random Forest,Baseline (No Privacy),0,8790,724
+COVID-19,45,Random Forest,Baseline (No Privacy),1,96,390
+COVID-19,45,Federated Logistic Regression,"FL (3 clients, 10 rounds)",0,8221,1293
+COVID-19,45,Federated Logistic Regression,"FL (3 clients, 10 rounds)",1,48,438
+COVID-19,45,Federated Random Forest,"FL (3 clients, 10 rounds)",0,9090,424
+COVID-19,45,Federated Random Forest,"FL (3 clients, 10 rounds)",1,180,306
+COVID-19,45,Federated Logistic Regression,"FL (5 clients, 20 rounds)",0,8233,1281
+COVID-19,45,Federated Logistic Regression,"FL (5 clients, 20 rounds)",1,48,438
+COVID-19,45,Federated Random Forest,"FL (5 clients, 20 rounds)",0,9173,341
+COVID-19,45,Federated Random Forest,"FL (5 clients, 20 rounds)",1,206,280
+COVID-19,45,Federated Logistic Regression,"FL (10 clients, 20 rounds)",0,8230,1284
+COVID-19,45,Federated Logistic Regression,"FL (10 clients, 20 rounds)",1,48,438
+COVID-19,45,Federated Random Forest,"FL (10 clients, 20 rounds)",0,9294,220
+COVID-19,45,Federated Random Forest,"FL (10 clients, 20 rounds)",1,259,227
 COVID-19,46,Logistic Regression,Baseline (No Privacy),0,8198,1316
 COVID-19,46,Logistic Regression,Baseline (No Privacy),1,53,433
-COVID-19,46,Federated Logistic Regression,"FL (5 clients, 20 rounds)",0,8350,1164
-COVID-19,46,Federated Logistic Regression,"FL (5 clients, 20 rounds)",1,61,425
+COVID-19,46,Random Forest,Baseline (No Privacy),0,8822,692
+COVID-19,46,Random Forest,Baseline (No Privacy),1,96,390
+COVID-19,46,Federated Logistic Regression,"FL (3 clients, 10 rounds)",0,8199,1315
+COVID-19,46,Federated Logistic Regression,"FL (3 clients, 10 rounds)",1,53,433
+COVID-19,46,Federated Random Forest,"FL (3 clients, 10 rounds)",0,9112,402
+COVID-19,46,Federated Random Forest,"FL (3 clients, 10 rounds)",1,162,324
+COVID-19,46,Federated Logistic Regression,"FL (5 clients, 20 rounds)",0,8206,1308
+COVID-19,46,Federated Logistic Regression,"FL (5 clients, 20 rounds)",1,53,433
+COVID-19,46,Federated Random Forest,"FL (5 clients, 20 rounds)",0,9204,310
+COVID-19,46,Federated Random Forest,"FL (5 clients, 20 rounds)",1,187,299
+COVID-19,46,Federated Logistic Regression,"FL (10 clients, 20 rounds)",0,8206,1308
+COVID-19,46,Federated Logistic Regression,"FL (10 clients, 20 rounds)",1,52,434
+COVID-19,46,Federated Random Forest,"FL (10 clients, 20 rounds)",0,9298,216
+COVID-19,46,Federated Random Forest,"FL (10 clients, 20 rounds)",1,241,245

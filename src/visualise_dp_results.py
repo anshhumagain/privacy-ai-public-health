@@ -1,228 +1,231 @@
 from pathlib import Path
-import pandas as pd
+
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
+
+from plot_style import (
+    METRICS,
+    METRIC_COLORS,
+    RUNTIME_COLOR,
+    LR_COLOR,
+    RF_COLOR,
+    BASELINE_LR_COLOR,
+    BASELINE_RF_COLOR,
+    DPI,
+    short_label,
+    style_axis,
+    annotate_bars,
+)
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 RESULTS_DIR = BASE_DIR / "results"
 GRAPHS_DIR = BASE_DIR / "graphs"
-
 GRAPHS_DIR.mkdir(exist_ok=True)
 
 
-def load_summary(filepath):
-    return pd.read_csv(filepath)
+def load_summary(path):
+    return pd.read_csv(path)
 
 
-def safe_dataset_key(dataset_name):
-    if dataset_name == "NHANES":
-        return "dp_nhanes"
-    if dataset_name == "COVID-19":
-        return "dp_covid_19"
-    return "dp_" + dataset_name.lower().replace("-", "_").replace(" ", "_")
+def sort_dp_rows(df):
+    df = df.copy()
+
+    def key(row):
+        setting = row["Privacy Setting"]
+        model = row["Model"]
+
+        if "Baseline" in setting:
+            return (99, 0 if model == "Logistic Regression" else 1)
+
+        eps = float(setting.split("e=")[1])
+        model_rank = 0 if "Logistic" in model else 1
+
+        # Sort from less private to more private:
+        # ε=10 → ε=5 → ε=1 → ε=0.5 → ε=0.1 → baseline
+        return (-eps, model_rank)
+
+    df["_sort"] = df.apply(key, axis=1)
+    return df.sort_values("_sort").drop(columns="_sort")
 
 
-def plot_results_with_errorbars(summary, dataset_name):
-    metrics = ["Accuracy", "F1 Score", "Precision", "Recall"]
-    colors = ["#2196F3", "#4CAF50", "#FF9800", "#F44336"]
+def plot_metrics(df, dataset, output_prefix):
+    df = sort_dp_rows(df)
 
-    labels = [
-        f"{row['Model']}\n({row['Privacy Setting']})"
-        for _, row in summary.iterrows()
-    ]
+    labels = [short_label(r["Model"], r["Privacy Setting"]) for _, r in df.iterrows()]
     x = np.arange(len(labels))
 
-    fig, axes = plt.subplots(2, 2, figsize=(20, 13))
+    fig, axes = plt.subplots(2, 2, figsize=(18, 10))
     fig.suptitle(
-        f"{dataset_name} — Differential Privacy Performance (mean ± std, 5 seeds)",
-        fontsize=15,
+        f"{dataset} — Differential Privacy Performance",
+        fontsize=18,
         fontweight="bold",
     )
 
-    for metric, ax, color in zip(metrics, axes.flatten(), colors):
-        means = summary[f"{metric} mean"].values
-        stds = summary[f"{metric} std"].values
+    for metric, ax in zip(METRICS, axes.flatten()):
+        means = df[f"{metric} mean"].values
+        stds = df[f"{metric} std"].fillna(0).values
 
         bars = ax.bar(
             x,
             means,
-            color=color,
-            alpha=0.8,
-            edgecolor="white",
-            linewidth=0.5,
             yerr=stds,
             capsize=3,
-            error_kw={"elinewidth": 1.2},
+            color=METRIC_COLORS[metric],
+            alpha=0.85,
+            edgecolor="white",
+            linewidth=0.5,
         )
 
-        for bar, mean, std in zip(bars, means, stds):
-            ax.text(
-                bar.get_x() + bar.get_width() / 2,
-                bar.get_height() + std + 0.01,
-                f"{mean:.3f}",
-                ha="center",
-                va="bottom",
-                fontsize=6.5,
-                fontweight="bold",
-            )
+        annotate_bars(ax, bars, means, offset=0.01)
 
-        ax.set_title(metric, fontsize=13, fontweight="bold")
+        ax.set_title(metric, fontsize=14, fontweight="bold")
         ax.set_xticks(x)
-        ax.set_xticklabels(labels, rotation=35, ha="right", fontsize=6.5)
-        ax.set_ylim(0, 1.15)
-        ax.set_ylabel("Score")
-        ax.axhline(
-            y=0.9,
-            color="red",
-            linestyle="--",
-            alpha=0.3,
-            label="0.9 threshold",
-        )
-        ax.grid(axis="y", alpha=0.3)
-        ax.legend(fontsize=8)
+        ax.set_xticklabels(labels, rotation=25, ha="right")
+        ax.set_ylim(0, 1.05)
+        style_axis(ax, ylabel="Score")
 
     plt.tight_layout()
-
-    fname = f"{safe_dataset_key(dataset_name)}_results.png"
-    plt.savefig(GRAPHS_DIR / fname, dpi=150, bbox_inches="tight")
-    plt.show()
-    print(f"Saved: graphs/{fname}")
-
-
-def plot_dp_tradeoff(summary, dataset_name):
-    dp_df = summary[summary["Privacy Setting"].str.startswith("DP")].copy()
-    dp_df["Epsilon"] = (
-        dp_df["Privacy Setting"]
-        .str.extract(r"e=(\d+\.?\d*)")
-        .astype(float)
+    plt.savefig(
+        GRAPHS_DIR / f"{output_prefix}_metrics.png",
+        dpi=DPI,
+        bbox_inches="tight",
     )
+    plt.show()
+    print(f"Saved: graphs/{output_prefix}_metrics.png")
 
-    baseline = summary[summary["Privacy Setting"] == "Baseline (No Privacy)"]
 
-    fig, axes = plt.subplots(1, 2, figsize=(16, 6))
+def plot_tradeoff(df, dataset, output_prefix):
+    df = sort_dp_rows(df)
+
+    dp = df[df["Privacy Setting"].str.startswith("DP")].copy()
+    dp["Epsilon"] = dp["Privacy Setting"].str.extract(r"e=(\d+\.?\d*)").astype(float)
+
+    baseline = df[df["Privacy Setting"].str.contains("Baseline", case=False, na=False)]
+
+    lr_base = baseline[baseline["Model"] == "Logistic Regression"].iloc[0]
+    rf_base = baseline[baseline["Model"] == "Random Forest"].iloc[0]
+
+    fig, axes = plt.subplots(1, 2, figsize=(18, 7))
     fig.suptitle(
-        f"{dataset_name} — Differential Privacy Utility Tradeoff (mean ± std)",
-        fontsize=14,
+        f"{dataset} — Differential Privacy Privacy-Utility Tradeoff",
+        fontsize=18,
         fontweight="bold",
     )
 
-    model_colors = {
-        "DP Logistic Regression": "#E91E63",
-        "DP Random Forest": "#9C27B0",
-    }
-
-    for ax, metric in zip(axes, ["Accuracy", "F1 Score"]):
-        for model_name, color in model_colors.items():
-            model_data = dp_df[dp_df["Model"] == model_name].sort_values(
+    for metric, ax in zip(["Accuracy", "F1 Score"], axes):
+        for model, color, label in [
+            ("DP Logistic Regression", LR_COLOR, "DP LR"),
+            ("DP Random Forest", RF_COLOR, "DP RF"),
+        ]:
+            model_df = dp[dp["Model"] == model].sort_values(
                 "Epsilon",
                 ascending=False,
             )
 
-            if model_data.empty:
+            if model_df.empty:
                 continue
 
             ax.errorbar(
-                model_data["Epsilon"],
-                model_data[f"{metric} mean"],
-                yerr=model_data[f"{metric} std"],
+                model_df["Epsilon"],
+                model_df[f"{metric} mean"],
+                yerr=model_df[f"{metric} std"].fillna(0),
                 marker="o",
                 linewidth=2,
                 capsize=4,
-                label=model_name,
                 color=color,
+                label=label,
             )
 
-        baseline_colors = {
-            "Logistic Regression": "#2196F3",
-            "Random Forest": "#4CAF50",
-        }
+        ax.axhline(
+            lr_base[f"{metric} mean"],
+            linestyle="--",
+            color=BASELINE_LR_COLOR,
+            alpha=0.7,
+            label="LR baseline",
+        )
 
-        for _, row in baseline.iterrows():
-            ax.axhline(
-                y=row[f"{metric} mean"],
-                linestyle="--",
-                alpha=0.6,
-                color=baseline_colors.get(row["Model"], "gray"),
-                label=f"{row['Model']} Baseline",
-            )
+        ax.axhline(
+            rf_base[f"{metric} mean"],
+            linestyle="--",
+            color=BASELINE_RF_COLOR,
+            alpha=0.7,
+            label="RF baseline",
+        )
 
-        ax.set_title(metric, fontsize=12, fontweight="bold")
-        ax.set_xlabel("Epsilon (← less private | more private →)")
-        ax.set_ylabel("Score")
-        ax.set_ylim(0, 1.1)
+        ax.set_title(metric, fontsize=14, fontweight="bold")
+        ax.set_xlabel("Epsilon (less private → more private)", fontsize=11)
+        ax.set_ylim(0, 1.05)
+
+        # Places ε=10 on the left and ε=0.1 on the right.
         ax.invert_xaxis()
-        ax.legend(fontsize=8, loc="lower right")
-        ax.grid(alpha=0.3)
+
+        style_axis(ax, ylabel="Score")
+        ax.legend(fontsize=9, loc="lower right")
 
     plt.tight_layout()
-
-    fname = f"{safe_dataset_key(dataset_name)}_tradeoff.png"
-    plt.savefig(GRAPHS_DIR / fname, dpi=150, bbox_inches="tight")
+    plt.savefig(
+        GRAPHS_DIR / f"{output_prefix}_privacy_utility.png",
+        dpi=DPI,
+        bbox_inches="tight",
+    )
     plt.show()
-    print(f"Saved: graphs/{fname}")
+    print(f"Saved: graphs/{output_prefix}_privacy_utility.png")
 
 
-def plot_runtime(summary, dataset_name):
-    labels = [
-        f"{row['Model']}\n({row['Privacy Setting']})"
-        for _, row in summary.iterrows()
-    ]
+def plot_runtime(df, dataset, output_prefix):
+    df = sort_dp_rows(df)
+
+    labels = [short_label(r["Model"], r["Privacy Setting"]) for _, r in df.iterrows()]
     x = np.arange(len(labels))
 
-    means = summary["Train Time (s) mean"].values
-    stds = summary["Train Time (s) std"].values
+    means = df["Train Time (s) mean"].values
+    stds = df["Train Time (s) std"].fillna(0).values
 
-    fig, ax = plt.subplots(figsize=(16, 6))
+    fig, ax = plt.subplots(figsize=(18, 8))
     fig.suptitle(
-        f"{dataset_name} — Differential Privacy Runtime Comparison (mean ± std)",
-        fontsize=14,
+        f"{dataset} — Differential Privacy Runtime Comparison",
+        fontsize=18,
         fontweight="bold",
     )
 
     bars = ax.bar(
         x,
         means,
-        color="#607D8B",
-        alpha=0.8,
-        edgecolor="white",
-        linewidth=0.5,
         yerr=stds,
         capsize=3,
+        color=RUNTIME_COLOR,
+        alpha=0.85,
+        edgecolor="white",
+        linewidth=0.5,
     )
 
-    for bar, mean in zip(bars, means):
-        ax.text(
-            bar.get_x() + bar.get_width() / 2,
-            bar.get_height() + 0.001,
-            f"{mean:.3f}s",
-            ha="center",
-            va="bottom",
-            fontsize=7,
-            fontweight="bold",
-        )
+    offset = max(means) * 0.02 if max(means) > 0 else 0.001
+    annotate_bars(ax, bars, means, offset=offset, suffix="s")
 
     ax.set_xticks(x)
-    ax.set_xticklabels(labels, rotation=35, ha="right", fontsize=7)
-    ax.set_ylabel("Training Time (seconds)")
-    ax.grid(axis="y", alpha=0.3)
+    ax.set_xticklabels(labels, rotation=25, ha="right")
+
+    style_axis(ax, ylabel="Runtime (seconds)")
 
     plt.tight_layout()
-
-    fname = f"{safe_dataset_key(dataset_name)}_runtime.png"
-    plt.savefig(GRAPHS_DIR / fname, dpi=150, bbox_inches="tight")
+    plt.savefig(
+        GRAPHS_DIR / f"{output_prefix}_runtime.png",
+        dpi=DPI,
+        bbox_inches="tight",
+    )
     plt.show()
-    print(f"Saved: graphs/{fname}")
+    print(f"Saved: graphs/{output_prefix}_runtime.png")
 
 
-nhanes = load_summary(RESULTS_DIR / "dp_nhanes_results_summary.csv")
-covid = load_summary(RESULTS_DIR / "dp_covid_results_summary.csv")
+for dataset, prefix, file in [
+    ("NHANES", "dp_nhanes", "dp_nhanes_results_summary.csv"),
+    ("COVID-19", "dp_covid", "dp_covid_results_summary.csv"),
+]:
+    data = load_summary(RESULTS_DIR / file)
 
-plot_results_with_errorbars(nhanes, "NHANES")
-plot_dp_tradeoff(nhanes, "NHANES")
-plot_runtime(nhanes, "NHANES")
+    plot_metrics(data, dataset, prefix)
+    plot_tradeoff(data, dataset, prefix)
+    plot_runtime(data, dataset, prefix)
 
-plot_results_with_errorbars(covid, "COVID-19")
-plot_dp_tradeoff(covid, "COVID-19")
-plot_runtime(covid, "COVID-19")
-
-print("\nAll DP graphs saved!")
+print("\nAll DP visualisations saved.")

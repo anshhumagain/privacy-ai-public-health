@@ -1,0 +1,21 @@
+Dataset,Seed,Model,Actual Class,Predicted 0,Predicted 1
+COVID-19,42,Normal Logistic Regression,0,9436,78
+COVID-19,42,Normal Logistic Regression,1,336,150
+COVID-19,42,HE Logistic Regression Inference,0,9436,78
+COVID-19,42,HE Logistic Regression Inference,1,336,150
+COVID-19,43,Normal Logistic Regression,0,9423,91
+COVID-19,43,Normal Logistic Regression,1,340,146
+COVID-19,43,HE Logistic Regression Inference,0,9423,91
+COVID-19,43,HE Logistic Regression Inference,1,340,146
+COVID-19,44,Normal Logistic Regression,0,9411,103
+COVID-19,44,Normal Logistic Regression,1,340,146
+COVID-19,44,HE Logistic Regression Inference,0,9411,103
+COVID-19,44,HE Logistic Regression Inference,1,340,146
+COVID-19,45,Normal Logistic Regression,0,9428,86
+COVID-19,45,Normal Logistic Regression,1,358,128
+COVID-19,45,HE Logistic Regression Inference,0,9428,86
+COVID-19,45,HE Logistic Regression Inference,1,358,128
+COVID-19,46,Normal Logistic Regression,0,9429,85
+COVID-19,46,Normal Logistic Regression,1,342,144
+COVID-19,46,HE Logistic Regression Inference,0,9429,85
+COVID-19,46,HE Logistic Regression Inference,1,342,144
